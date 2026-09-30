@@ -15,7 +15,7 @@ namespace Soenneker.X.Users.Tests;
 public sealed class XUsersUtilTests
 {
     [Test]
-    public async Task CreatePost_sends_text_and_reads_created_id()
+    public async ValueTask CreatePost_sends_text_and_reads_created_id()
     {
         using var handler = new RecordingHandler();
         using var provider = new ClientProvider(handler);
@@ -28,7 +28,7 @@ public sealed class XUsersUtilTests
     }
 
     [Test]
-    public async Task CreatePost_preserves_reply_and_media_options()
+    public async ValueTask CreatePost_preserves_reply_and_media_options()
     {
         using var handler = new RecordingHandler();
         using var provider = new ClientProvider(handler);
@@ -44,7 +44,7 @@ public sealed class XUsersUtilTests
     }
 
     [Test]
-    public async Task CreatePost_propagates_api_failure_without_retry()
+    public async ValueTask CreatePost_propagates_api_failure_without_retry()
     {
         using var handler = new RecordingHandler { StatusCode = HttpStatusCode.Forbidden };
         using var provider = new ClientProvider(handler);
