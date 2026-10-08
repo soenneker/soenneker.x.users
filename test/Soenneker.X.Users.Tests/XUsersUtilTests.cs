@@ -15,12 +15,12 @@ namespace Soenneker.X.Users.Tests;
 public sealed class XUsersUtilTests
 {
     [Test]
-    public async ValueTask CreatePost_sends_text_and_reads_created_id()
+    public async ValueTask CreatePost_sends_text_and_reads_created_id(CancellationToken cancellationToken)
     {
         using var handler = new RecordingHandler();
         using var provider = new ClientProvider(handler);
         var util = new XUsersUtil(provider);
-        var result = await util.CreatePost("Hello X");
+        var result = await util.CreatePost("Hello X", cancellationToken: cancellationToken);
         await Assert.That(handler.Method).IsEqualTo(HttpMethod.Post);
         await Assert.That(handler.Url).IsEqualTo("https://api.x.com/2/tweets");
         await Assert.That(handler.Body).Contains("\"text\":\"Hello X\"");
@@ -28,7 +28,7 @@ public sealed class XUsersUtilTests
     }
 
     [Test]
-    public async ValueTask CreatePost_preserves_reply_and_media_options()
+    public async ValueTask CreatePost_preserves_reply_and_media_options(CancellationToken cancellationToken)
     {
         using var handler = new RecordingHandler();
         using var provider = new ClientProvider(handler);
@@ -38,19 +38,19 @@ public sealed class XUsersUtilTests
             Text = "A reply",
             Reply = new CreatePostsReply { InReplyToTweetId = "456" },
             Media = new CreatePostsMedia { MediaIds = ["789"] }
-        });
+        }, cancellationToken: cancellationToken);
         await Assert.That(handler.Body).Contains("\"in_reply_to_tweet_id\":\"456\"");
         await Assert.That(handler.Body).Contains("\"media_ids\":[\"789\"]");
     }
 
     [Test]
-    public async ValueTask CreatePost_propagates_api_failure_without_retry()
+    public async ValueTask CreatePost_propagates_api_failure_without_retry(CancellationToken cancellationToken)
     {
         using var handler = new RecordingHandler { StatusCode = HttpStatusCode.Forbidden };
         using var provider = new ClientProvider(handler);
         var util = new XUsersUtil(provider);
         var failed = false;
-        try { await util.CreatePost("Hello X"); }
+        try { await util.CreatePost("Hello X", cancellationToken: cancellationToken); }
         catch (Microsoft.Kiota.Abstractions.ApiException) { failed = true; }
         await Assert.That(failed).IsTrue();
         await Assert.That(handler.Calls).IsEqualTo(1);
